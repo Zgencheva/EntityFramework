@@ -38,8 +38,160 @@ namespace Exc
                 //AddMinionAndSetVillainsTowns(connection);
                 //5.	Change Town Names Casing
                 //PrintAffectedTownNAmesByCountry(connection);
+                //6.*Remove Villain 
+                //RemoveVillain(connection);
+                //7.	Print All Minion Names
+                //SqlCommand selectCommand;
+                //SqlDataReader reader;
+                //PrintAllMinionNames(connection, out selectCommand, out reader);
+                //8. Increase Minion Age
+                //IncreaseMnionAge(connection);
+                //9.	Increase Age Stored Procedure 
+                //IncreaseAgeStoredProcedure(connection);
 
             }
+        }
+
+        private static void IncreaseAgeStoredProcedure(SqlConnection connection)
+        {
+            int id = int.Parse(Console.ReadLine());
+            string query = @"Exec usp_GetOlder @Id";
+            using (var command = new SqlCommand(query, connection))
+            {
+                command.Parameters.AddWithValue("@Id", id);
+                command.ExecuteNonQuery();
+
+                string selectQuery = @"SELECT Name, Age FROM Minions WHERE Id = @Id";
+                using (var nameCommand = new SqlCommand(selectQuery, connection))
+                {
+                    nameCommand.Parameters.AddWithValue("@Id", id);
+                    var reader = nameCommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Console.WriteLine($"{reader[0]} – {reader[1]} years old");
+                    }
+
+                }
+            }
+        }
+
+        private static void IncreaseMnionAge(SqlConnection connection)
+        {
+            int[] ids = Console.ReadLine()
+                                .Split()
+                                .Select(int.Parse)
+                                .ToArray();
+
+            string updateMinionsAgeQuery = @" UPDATE Minions
+                                               SET Name = UPPER(LEFT(Name, 1)) + SUBSTRING(Name, 2, LEN(Name)), Age += 1
+                                             WHERE Id = @Id";
+            using (var updateCommand = new SqlCommand(updateMinionsAgeQuery, connection))
+
+            {
+                foreach (var id in ids)
+                {
+                    updateCommand.Parameters.AddWithValue("@Id", id);
+                    updateCommand.ExecuteNonQuery();
+                    updateCommand.Parameters.Clear();
+                }
+            }
+
+            string printAllNamesQuery = @"SELECT Name, Age FROM Minions";
+            using (var commandNames = new SqlCommand(printAllNamesQuery, connection))
+            {
+                var reader = commandNames.ExecuteReader();
+                while (reader.Read())
+                {
+                    Console.WriteLine($"{reader[0]} {reader[1]}");
+                }
+            }
+        }
+
+        private static void PrintAllMinionNames(SqlConnection connection, out SqlCommand selectCommand, out SqlDataReader reader)
+        {
+            var minionsQuerry = @"SELECT Name FROM Minions";
+            selectCommand = new SqlCommand(minionsQuerry, connection);
+            reader = selectCommand.ExecuteReader();
+            var minions = new List<string>();
+            while (reader.Read())
+            {
+                minions.Add((string)reader[0]);
+            }
+            if (minions.Count % 2 == 0)
+            {
+                var counterBAck = minions.Count - 1;
+                for (int i = 0; i < minions.Count / 2; i++)
+                {
+                    Console.WriteLine(minions[i]);
+                    Console.WriteLine(minions[counterBAck]);
+                    counterBAck--;
+                }
+            }
+            else
+            {
+                var counterBAck = minions.Count - 1;
+                for (int i = 0; i < minions.Count / 2 + 1; i++)
+                {
+                    if (i == minions.Count / 2)
+                    {
+                        Console.WriteLine(minions[i]);
+                    }
+                    else
+                    {
+                        Console.WriteLine(minions[i]);
+                        Console.WriteLine(minions[counterBAck]);
+                        counterBAck--;
+                    }
+
+                }
+            }
+        }
+
+        private static void RemoveVillain(SqlConnection connection)
+        {
+            var villainId = int.Parse(Console.ReadLine());
+            var currentVillain = "";
+            var villainNameQuery = @"SELECT Name FROM Villains WHERE Id = @villainId";
+            using (var villainFoundNameCommand = new SqlCommand(villainNameQuery, connection))
+            {
+                villainFoundNameCommand.Parameters.AddWithValue("@villainId", villainId);
+                currentVillain = (string)villainFoundNameCommand.ExecuteScalar();
+                if (currentVillain == null)
+                {
+                    Console.WriteLine("No such villain was found.");
+
+                }
+                else
+                {
+                    var affectedRows = 0;
+                    var deleteMinionVillainsQuery = @"DELETE FROM MinionsVillains
+                                                    WHERE VillainId = @villainId;";
+
+                    using (var sqlDeleteMVCommand = new SqlCommand(deleteMinionVillainsQuery, connection))
+                    {
+                        sqlDeleteMVCommand.Parameters.AddWithValue("@villainId", villainId);
+                        affectedRows = sqlDeleteMVCommand.ExecuteNonQuery();
+
+
+                    }
+                    var deleteVillainQuery = @"DELETE FROM Villains
+                                            WHERE Id = @villainId";
+                    using (var sqlDeleteVCommand = new SqlCommand(deleteVillainQuery, connection))
+                    {
+                        sqlDeleteVCommand.Parameters.AddWithValue("@villainId", villainId);
+                        sqlDeleteVCommand.ExecuteNonQuery();
+
+                    }
+
+                    Console.WriteLine($"{currentVillain} was deleted.");
+                    Console.WriteLine($"{affectedRows} minions were released.");
+
+
+                }
+
+
+
+            };
         }
 
         private static void PrintAffectedTownNAmesByCountry(SqlConnection connection)
