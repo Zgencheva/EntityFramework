@@ -18,6 +18,8 @@ namespace CoeFirstDemo.Models
 
         [MaxLength(50)]
         public string Author { get; set; }
+        //Required = not null
+        //[Required]
         public string Content { get; set; }
     }
 }
