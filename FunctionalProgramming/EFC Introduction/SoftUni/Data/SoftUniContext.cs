@@ -117,8 +117,8 @@ namespace SoftUni.Data
                     .WithMany(p => p.Employees)
                     .UsingEntity<Dictionary<string, object>>(
                         "EmployeesProject",
-                        l => l.HasOne<Project>().WithMany().HasForeignKey("ProjectId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK_EmployeesProjects_Projects"),
-                        r => r.HasOne<Employee>().WithMany().HasForeignKey("EmployeeId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK_EmployeesProjects_Employees"),
+                        l => l.HasOne<Project>().WithMany().HasForeignKey("ProjectId").OnDelete(DeleteBehavior.Cascade).HasConstraintName("FK_EmployeesProjects_Projects"),
+                        r => r.HasOne<Employee>().WithMany().HasForeignKey("EmployeeId").OnDelete(DeleteBehavior.Cascade).HasConstraintName("FK_EmployeesProjects_Employees"),
                         j =>
                         {
                             j.HasKey("EmployeeId", "ProjectId");
