@@ -5,7 +5,7 @@ using System.Text;
 
 var db = new SoftUniContext();
 
-Console.WriteLine(RemoveTown(db));
+Console.WriteLine(GetEmployeesInPeriod(db));
 
 
 static string GetEmployeesFullInformation(SoftUniContext context)
@@ -129,7 +129,7 @@ static string GetAddressesByTown(SoftUniContext context) {
 
     foreach (var address in query)
     {
-        sb.AppendLine($"{address.AddressText}, {address.townName} - {address.empCount}");
+        sb.AppendLine($"{address.AddressText}, {address.townName} - {address.empCount} employees");
     }
     return sb.ToString();
 }
