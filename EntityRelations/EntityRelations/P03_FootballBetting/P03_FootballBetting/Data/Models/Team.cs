@@ -23,7 +23,7 @@ namespace P03_FootballBetting.Data.Models
         [Column(TypeName = "char(3)")]
         public string Initials { get; set; }
       
-        public Decimal Budget { get; set; }
+        public decimal Budget { get; set; }
         [ForeignKey("PrimaryKitColor")]
         public int PrimaryKitColorId { get; set; }
         [InverseProperty(nameof(Color.PrimaryKitTeams))]
