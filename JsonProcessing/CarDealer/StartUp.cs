@@ -29,8 +29,15 @@ namespace CarDealer
             //};
             var suppliersJson = File.ReadAllText("../../../Datasets/suppliers.json");
             var partsJson = File.ReadAllText("../../../Datasets/parts.json");
-           //ImportSuppliers(context, suppliersJson); 
-           Console.WriteLine(ImportParts(context, partsJson));
+            var carsJson = File.ReadAllText("../../../Datasets/cars.json");
+            var customersJson = File.ReadAllText("../../../Datasets/customers.json");
+            var salesJson = File.ReadAllText("../../../Datasets/sales.json");
+            //ImportSuppliers(context, suppliersJson);
+            //ImportParts(context, partsJson);
+            //ImportCars(context, carsJson);
+            //ImportCustomers(context, customersJson);
+            Console.WriteLine(ImportSales(context, salesJson));
+
         }
 
         private static void InitializeAutoMapper()
@@ -64,21 +71,98 @@ namespace CarDealer
             var partsDto = JsonConvert.DeserializeObject<IEnumerable<PartsInputModel>>(inputJson, options);
             var parts = mapper.Map<IEnumerable<Part>>(partsDto);
             var suppliers = context.Suppliers.ToList();
-
-            Random rnd = new Random();
+            var partList = new List<Part>();
 
             foreach (var part in parts)
             {
-                int randomSupplierIndex = rnd.Next(0, suppliers.Count - 1);
-
-                part.Supplier = suppliers[randomSupplierIndex];
+                if (suppliers.Any(x => x.Id == part.SupplierId)) {
+                    partList.Add(part);
+                }
             }
 
-
-            context.Parts.AddRange(parts);
+            context.Parts.AddRange(partList);
 
             return $"Successfully imported {context.SaveChanges()}.";
             //return null;
+        }
+
+        public static string ImportCars(CarDealerContext context, string inputJson)
+        {
+            InitializeAutoMapper();
+            var carsDto = JsonConvert.DeserializeObject<IEnumerable<CarsInputModel>>(inputJson);
+            var cars = new List<Car>();
+
+            foreach (var carDto in carsDto)
+            {
+                var car = new Car
+                {
+                    Model = carDto.Model,
+                    Make = carDto.Make,
+                    TravelledDistance = carDto.TravelledDistance,
+                
+                };
+
+                // context.Cars.Add(car);
+                if (carDto.PartsId == null)
+                {
+                    cars.Add(car);
+                    continue;
+                }
+
+                foreach (var part in carDto.PartsId)
+                {
+                    var currentPart = context.Parts.FirstOrDefault(x => x.Id == part);
+                    if (currentPart == null)
+                    {
+                        continue;
+                    }
+                    if (car.PartCars.Count != 0 && car.PartCars.Any(x=> x.Part == currentPart)) {
+                        continue;
+                    }
+                    
+                        var carPart = new PartCar
+                        {
+                            Car = car,
+                            Part = currentPart,
+                        };
+                        
+                        car.PartCars.Add(carPart);
+                    
+                }
+                cars.Add(car);
+            }
+
+            context.Cars.AddRange(cars);
+            context.SaveChanges();
+            return $"Successfully imported {cars.Count}."; ;
+        }
+
+        public static string ImportCustomers(CarDealerContext context, string inputJson) {
+
+            InitializeAutoMapper();
+            var customersDto = JsonConvert.DeserializeObject<IEnumerable<CustomersInputDTO>>(inputJson);
+
+            var customers = mapper.Map<IEnumerable<Customer>>(customersDto);
+            context.Customers.AddRange(customers);
+
+            return $"Successfully imported {context.SaveChanges()}.";
+        }
+
+        public static string ImportSales(CarDealerContext context, string inputJson)
+        {
+
+            InitializeAutoMapper();
+            //var withod = JsonConvert.DeserializeObject<IEnumerable<SalesImportDto>>(inputJson);
+            var salesDto = JsonConvert.DeserializeObject<IEnumerable<SalesImportDto>>(inputJson)
+                .Where(x=> context.Customers.Any(y=> y.Id == x.CustomerId)
+                 && context.Cars.Any(c=> c.Id == x.CarId));
+            
+            var sales = mapper.Map<IEnumerable<Sale>>(salesDto);
+            
+            context.Sales.AddRange(sales);
+
+            return $"Successfully imported {context.SaveChanges()}.";
+            
         }
     }
 }

@@ -1,60 +1,8 @@
 [
-  {
-    "make": "Opel",
-    "model": "Omega",
-    "travelledDistance": 176664996,
-    "partsId": [
-      38,
-      102,
-      23,
-      116,
-      46,
-      68,
-      88,
-      104,
-      71,
-      32,
-      114
-    ]
-  },
-  {
-    "make": "Opel",
-    "model": "Astra",
-    "travelledDistance": 516628215,
-    "partsId": [
-      39,
-      62,
-      72
-    ]
-  },
-  {
-    "make": "Opel",
-    "model": "Astra",
-    "travelledDistance": 156191509,
-    "partsId": [
-      48,
-      44,
-      112
-    ]
-  },
-  {
-    "make": "Opel",
-    "model": "Corsa",
-    "travelledDistance": 347259126,
-    "partsId": [
-      36,
-      114,
-      88,
-      115,
-      72,
-      11,
-      50,
-      75,
-      20,
-      54,
-      8
-    ]
-  },
+  
+
+
+  
   {
     "make": "Opel",
     "model": "Kadet",
