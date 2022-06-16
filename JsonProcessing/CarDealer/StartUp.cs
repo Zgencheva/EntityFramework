@@ -18,25 +18,27 @@ namespace CarDealer
         public static void Main(string[] args)
         {
             CarDealerContext context = new CarDealerContext();
-           //context.Database.EnsureDeleted();
-           //context.Database.EnsureCreated();
-         
+            //context.Database.EnsureDeleted();
+            //context.Database.EnsureCreated();
+
             //InitializeAutoMapper();
             //var serilized = new JsonSerializerSettings
             //{
             //    Formatting = Formatting.Indented,
-            //    NullValueHandling = NullValueHandling.Include,
+            //    NullValueHandling = NullValueHandling.Include
             //};
-            var suppliersJson = File.ReadAllText("../../../Datasets/suppliers.json");
-            var partsJson = File.ReadAllText("../../../Datasets/parts.json");
-            var carsJson = File.ReadAllText("../../../Datasets/cars.json");
-            var customersJson = File.ReadAllText("../../../Datasets/customers.json");
-            var salesJson = File.ReadAllText("../../../Datasets/sales.json");
+            //var suppliersJson = File.ReadAllText("../../../Datasets/suppliers.json");
+            //var partsJson = File.ReadAllText("../../../Datasets/parts.json");
+            //var carsJson = File.ReadAllText("../../../Datasets/cars.json");
+            //var customersJson = File.ReadAllText("../../../Datasets/customers.json");
+            //var salesJson = File.ReadAllText("../../../Datasets/sales.json");
             //ImportSuppliers(context, suppliersJson);
             //ImportParts(context, partsJson);
             //ImportCars(context, carsJson);
             //ImportCustomers(context, customersJson);
-            Console.WriteLine(ImportSales(context, salesJson));
+            //ImportSales(context, salesJson);
+            //Console.WriteLine(GetOrderedCustomers(context));
+            Console.WriteLine(GetTotalSalesByCustomer(context));
 
         }
 
@@ -163,6 +165,140 @@ namespace CarDealer
 
             return $"Successfully imported {context.SaveChanges()}.";
             
+        }
+
+        public static string GetOrderedCustomers(CarDealerContext context)
+        {
+
+            InitializeAutoMapper();
+            var orderedCustomers = context.Customers
+                            .OrderBy(x => x.BirthDate)
+                            .ThenBy(x => x.IsYoungDriver)
+                            .ToList();
+            var customersDTOs = mapper.Map<IEnumerable<OrderedCustomersDTO>>(orderedCustomers);
+            var serilized = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Include,
+                DateFormatHandling = DateFormatHandling.MicrosoftDateFormat,
+                DateFormatString = "dd/MM/yyyy",
+
+        };
+            var outputResult = JsonConvert.SerializeObject(customersDTOs, serilized);
+
+            return outputResult;
+        }
+
+        public static string GetCarsFromMakeToyota(CarDealerContext context)
+        {
+
+            InitializeAutoMapper();
+            var orderedCars = context.Cars
+                            .Where(c=> c.Make == "Toyota")
+                            .OrderBy(x => x.Model)
+                            .ThenByDescending(x => x.TravelledDistance)
+                            .ToList();
+            var carsDTOs = mapper.Map<IEnumerable<ExportCarDTO>>(orderedCars);
+            var serilized = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                //NullValueHandling = NullValueHandling.Include,
+                //DateFormatHandling = DateFormatHandling.MicrosoftDateFormat,
+                //DateFormatString = "dd/MM/yyyy",
+
+            };
+            var outputResult = JsonConvert.SerializeObject(carsDTOs, serilized);
+
+            return outputResult;
+        }
+
+        public static string GetLocalSuppliers(CarDealerContext context)
+        {
+
+            InitializeAutoMapper();
+            var suppliers = context.Suppliers
+                            .Include(x=> x.Parts)
+                            .Where(c => c.IsImporter == false)
+                            .ToList();
+            var suppliersDto = mapper.Map<IEnumerable<SuppliesPartsExport>>(suppliers);
+            var serilized = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                //NullValueHandling = NullValueHandling.Include,
+                //DateFormatHandling = DateFormatHandling.MicrosoftDateFormat,
+                //DateFormatString = "dd/MM/yyyy",
+
+            };
+            var outputResult = JsonConvert.SerializeObject(suppliersDto, serilized);
+
+            return outputResult;
+        }
+
+        public static string GetCarsWithTheirListOfParts(CarDealerContext context)
+        {
+
+            InitializeAutoMapper();
+            var carProection = context.Cars
+                            .Include(x => x.PartCars)
+                            .ThenInclude(c => c.Part)
+                            .Select(x => new
+                            {
+                                car = new {
+                                    Make = x.Make,
+                                    Model = x.Model,
+                                    TravelledDistance = x.TravelledDistance
+                                },
+                                parts =
+                                x.PartCars.Select(p=> new { 
+                                    Name = p.Part.Name,
+                                    Price = $"{p.Part.Price:F2}",
+                                }).ToArray(),
+                            })
+                            .ToList();
+           
+            var serilized = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                FloatFormatHandling = FloatFormatHandling.DefaultValue,
+               
+            };
+            var outputResult = JsonConvert.SerializeObject(carProection, serilized);
+
+            return outputResult;
+        }
+
+        public static string GetTotalSalesByCustomer(CarDealerContext context)
+        {
+
+            InitializeAutoMapper();
+            var salesProection = context.Customers
+                            .Include(x => x.Sales)
+                            .ThenInclude(x=> x.Car)
+                            .ThenInclude(x=> x.PartCars)
+                            .ThenInclude(x=> x.Part)
+                            .Where(c => c.Sales.Count() > 0)
+                            .Select(x => new
+                            {
+
+                                fullName = x.Name,
+                                boughtCars = x.Sales.Count,
+                                spentMoney = x.Sales.Sum(s=> s.Car.PartCars.Sum(p=> p.Part.Price))
+
+                            })
+                             .OrderByDescending(c => c.spentMoney)
+                            .ThenByDescending(c => c.boughtCars)
+                            .ToArray();
+                           
+
+            var serilized = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                FloatFormatHandling = FloatFormatHandling.DefaultValue,
+
+            };
+            var outputResult = JsonConvert.SerializeObject(salesProection, serilized);
+
+            return outputResult;
         }
     }
 }

@@ -18,6 +18,11 @@ namespace CarDealer
             this.CreateMap<CustomersInputDTO, Customer>();
             this.CreateMap<SalesImportDto, Sale>();
 
+            this.CreateMap<Customer, OrderedCustomersDTO>();
+            this.CreateMap<Car, ExportCarDTO>();
+            this.CreateMap<Supplier, SuppliesPartsExport>()
+                .ForMember(x=> x.PartsCount, y=> y.MapFrom(s=> s.Parts.Count));
+
         }
     }
 }
