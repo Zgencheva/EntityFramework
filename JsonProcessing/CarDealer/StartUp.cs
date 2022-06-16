@@ -38,7 +38,7 @@ namespace CarDealer
             //ImportCustomers(context, customersJson);
             //ImportSales(context, salesJson);
             //Console.WriteLine(GetOrderedCustomers(context));
-            Console.WriteLine(GetTotalSalesByCustomer(context));
+            Console.WriteLine(GetSalesWithAppliedDiscount(context));
 
         }
 
@@ -299,6 +299,29 @@ namespace CarDealer
             var outputResult = JsonConvert.SerializeObject(salesProection, serilized);
 
             return outputResult;
+        }
+        public static string GetSalesWithAppliedDiscount(CarDealerContext context)
+        {
+            var sales = context.Sales
+                .Take(10)
+                .Select(s => new
+                {
+                    car = new
+                    {
+                        Make = s.Car.Make,
+                        Model = s.Car.Model,
+                        TravelledDistance = s.Car.TravelledDistance
+                    },
+                    customerName = s.Customer.Name,
+                    Discount = $"{s.Discount:F2}",
+                    price = $"{s.Car.PartCars.Sum(pc => pc.Part.Price):F2}",
+                    priceWithDiscount = $"{s.Car.PartCars.Sum(pc => pc.Part.Price) * (1 - (s.Discount / 100)):F2}",
+                })
+                .ToArray();
+
+            var jsonFile = JsonConvert.SerializeObject(sales, Formatting.Indented);
+
+            return jsonFile;
         }
     }
 }
