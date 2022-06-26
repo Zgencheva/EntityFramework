@@ -15,8 +15,8 @@ namespace ProductShop
             this.CreateMap<CategoriesInputModel, Category>();
             this.CreateMap<CategoriesProductsInputModels, CategoryProduct>();
 
-            this.CreateMap<Product, ProductsInangeExportDTO>()
-                .ForMember(x => x.buyer, y => y.MapFrom(s => s.Buyer.FirstName + " " + s.Buyer.LastName));
+            //this.CreateMap<Product, ProductsInangeExportDTO>()
+            //    .ForMember(x => x.Buyer, y => y.MapFrom(s => s.Buyer.FirstName + " " + s.Buyer.LastName));
         }
     }
 }

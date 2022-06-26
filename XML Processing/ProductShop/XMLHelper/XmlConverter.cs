@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace ProductShop.XML_Helper
+namespace ProductShop.XMLHelper
 {
     public static class XmlConverter
     {
@@ -16,7 +16,7 @@ namespace ProductShop.XML_Helper
 
             var builder = new StringBuilder();
 
-            var write = new StringWriter(builder);
+            using var write = new StringWriter(builder);
             serializer.Serialize(write, dataTransferObjects, GetXmlNamespaces());
 
             return builder.ToString();
@@ -30,7 +30,7 @@ namespace ProductShop.XML_Helper
 
             var builder = new StringBuilder();
 
-            var writer = new StringWriter(builder);
+            using var writer = new StringWriter(builder);
             serializer.Serialize(writer, dataTransferObjects, GetXmlNamespaces());
 
             return builder.ToString();
@@ -67,3 +67,4 @@ namespace ProductShop.XML_Helper
             return xmlNamespaces;
         }
     }
+}

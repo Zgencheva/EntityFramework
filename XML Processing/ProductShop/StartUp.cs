@@ -12,6 +12,7 @@ using ProductShop.Dtos.Import;
 using ProductShop.Dtos.Export;
 using ProductShop.Models;
 using System.Text;
+using ProductShop.XMLHelper;
 
 namespace ProductShop
 {
@@ -23,19 +24,19 @@ namespace ProductShop
         public static void Main(string[] args)
         {
             var context = new ProductShopContext();
-            //context.Database.EnsureDeleted();
-            //context.Database.EnsureCreated();
+           // context.Database.EnsureDeleted();
+           // context.Database.EnsureCreated();
 
-            //var xmlUsers = File.ReadAllText("../../../Datasets/users.xml");
-            //var xmlProducts = File.ReadAllText("../../../Datasets/products.xml");
-            //var xmlCategories = File.ReadAllText("../../../Datasets/categories.xml");
-            //var xmlCatProd = File.ReadAllText("../../../Datasets/categories-products.xml");
-
-            //ImportUsers(context, xmlUsers));
-            //ImportProducts(context, xmlProducts));
-           //ImportCategories(context, xmlCategories));
-            //ImportCategoryProducts(context, xmlCatProd));
-            Console.WriteLine(GetProductsInRange(context));
+           // var xmlUsers = File.ReadAllText("../../../Datasets/users.xml");
+           //var xmlProducts = File.ReadAllText("../../../Datasets/products.xml");
+           // var xmlCategories = File.ReadAllText("../../../Datasets/categories.xml");
+           // var xmlCatProd = File.ReadAllText("../../../Datasets/categories-products.xml");
+          
+           // Console.WriteLine(ImportUsers(context, xmlUsers));
+           // Console.WriteLine(ImportProducts(context, xmlProducts));
+           // Console.WriteLine(ImportCategories(context, xmlCategories));
+           // Console.WriteLine(ImportCategoryProducts(context, xmlCatProd));
+            //Console.WriteLine(GetProductsInRange(context));
 
         }
 
@@ -52,13 +53,14 @@ namespace ProductShop
         {
             InitializeAutoMapper();
             const string root = "Users";
-            var xmlSerializer = new XmlSerializer(typeof(UserInputModel[]),
-                new XmlRootAttribute(root));
-            var textRead = new StringReader(inputXml);
-            var usersDtos = (UserInputModel[])xmlSerializer.Deserialize(textRead);
+
+            var usersDtos = XmlConverter.Deserializer<UserInputModel>(inputXml, root);
+            //var xmlSerializer = new XmlSerializer(typeof(UserInputModel[]),
+            //    new XmlRootAttribute(root));
+            //var textRead = new StringReader(inputXml);
+            //var usersDtos = (UserInputModel[])xmlSerializer.Deserialize(textRead);
             var users = mapper.Map<User[]>(usersDtos);
             context.Users.AddRange(users);
-            //context.SaveChanges();
 
             return $"Successfully imported {context.SaveChanges()}"; ;
         }
@@ -67,11 +69,12 @@ namespace ProductShop
         {
             InitializeAutoMapper();
             const string root = "Products";
+            var productsDtos = XmlConverter.Deserializer<ProductImputModel>(inputXml, root);
 
-            var xmlSerializer = new XmlSerializer(typeof(ProductImputModel[]),
-                new XmlRootAttribute(root));
-            var textRead = new StringReader(inputXml);
-            var productsDtos = (ProductImputModel[])xmlSerializer.Deserialize(textRead);
+            //var xmlSerializer = new XmlSerializer(typeof(ProductImputModel[]),
+            //    new XmlRootAttribute(root));
+            //var textRead = new StringReader(inputXml);
+            //var productsDtos = (ProductImputModel[])xmlSerializer.Deserialize(textRead);
             var products = mapper.Map<Product[]>(productsDtos);
             context.Products.AddRange(products);
             //context.SaveChanges();
@@ -83,11 +86,12 @@ namespace ProductShop
         {
             InitializeAutoMapper();
             const string root = "Categories";
+            var categoriesDtos = XmlConverter.Deserializer<CategoriesInputModel>(inputXml, root);
 
-            var xmlSerializer = new XmlSerializer(typeof(CategoriesInputModel[]),
-                new XmlRootAttribute(root));
-            var textRead = new StringReader(inputXml);
-            var categoriesDtos = (CategoriesInputModel[])xmlSerializer.Deserialize(textRead);
+            //var xmlSerializer = new XmlSerializer(typeof(CategoriesInputModel[]),
+            //    new XmlRootAttribute(root));
+            //var textRead = new StringReader(inputXml);
+            //var categoriesDtos = (CategoriesInputModel[])xmlSerializer.Deserialize(textRead);
             var categories = mapper.Map<Category[]>(categoriesDtos);
             context.Categories.AddRange(categories);
             //context.SaveChanges();
@@ -99,17 +103,22 @@ namespace ProductShop
         {
             InitializeAutoMapper();
             const string root = "CategoryProducts";
+            var catProdsDtos = XmlConverter.Deserializer<CategoriesProductsInputModels>(inputXml, root);
 
-            var xmlSerializer = new XmlSerializer(typeof(CategoriesProductsInputModels[]),
-                new XmlRootAttribute(root));
-            var textRead = new StringReader(inputXml);
-            var catProdsDtos = (CategoriesProductsInputModels[])xmlSerializer.Deserialize(textRead);
+            //var xmlSerializer = new XmlSerializer(typeof(CategoriesProductsInputModels[]),
+            //    new XmlRootAttribute(root));
+            //var textRead = new StringReader(inputXml);
+            //var catProdsDtos = (CategoriesProductsInputModels[])xmlSerializer.Deserialize(textRead);
             var catProds = mapper.Map<CategoryProduct[]>(catProdsDtos);
             var categoriesForBD = new List<CategoryProduct>();
             var allCategoriesProducts = context.CategoryProducts.ToList();
             foreach (var catProd in catProds)
             {
                 if (allCategoriesProducts.Any(x=> x.CategoryId == catProd.CategoryId && x.ProductId == catProd.ProductId))
+                {
+                    continue;
+                }
+                if (categoriesForBD.Any(x => x.CategoryId == catProd.CategoryId && x.ProductId == catProd.ProductId))
                 {
                     continue;
                 }
