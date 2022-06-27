@@ -241,7 +241,11 @@ namespace ProductShop
 
 
             var result = XmlConverter.Serialize(usersWithPRoducts, "Users");
-            //Console.WriteLine(result.ToCharArray().charAt(123));
+            //var resultASchararrat = result.ToString();
+            //Console.WriteLine(resultASchararrat.Substring(115, 152));
+            
+            ////Console.WriteLine(result.ToCharArray().charAt(123));
+            //return null;
             return result.ToString().TrimEnd();
         }
     }
