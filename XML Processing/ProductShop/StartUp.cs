@@ -24,19 +24,19 @@ namespace ProductShop
         public static void Main(string[] args)
         {
             var context = new ProductShopContext();
-           // context.Database.EnsureDeleted();
-           // context.Database.EnsureCreated();
+            //context.Database.EnsureDeleted();
+            //context.Database.EnsureCreated();
 
-           // var xmlUsers = File.ReadAllText("../../../Datasets/users.xml");
-           //var xmlProducts = File.ReadAllText("../../../Datasets/products.xml");
-           // var xmlCategories = File.ReadAllText("../../../Datasets/categories.xml");
-           // var xmlCatProd = File.ReadAllText("../../../Datasets/categories-products.xml");
-          
-           // Console.WriteLine(ImportUsers(context, xmlUsers));
-           // Console.WriteLine(ImportProducts(context, xmlProducts));
-           // Console.WriteLine(ImportCategories(context, xmlCategories));
-           // Console.WriteLine(ImportCategoryProducts(context, xmlCatProd));
-            //Console.WriteLine(GetProductsInRange(context));
+            //var xmlUsers = File.ReadAllText("../../../Datasets/users.xml");
+            //var xmlProducts = File.ReadAllText("../../../Datasets/products.xml");
+            //var xmlCategories = File.ReadAllText("../../../Datasets/categories.xml");
+            //var xmlCatProd = File.ReadAllText("../../../Datasets/categories-products.xml");
+
+            //Console.WriteLine(ImportUsers(context, xmlUsers));
+            //Console.WriteLine(ImportProducts(context, xmlProducts));
+            //Console.WriteLine(ImportCategories(context, xmlCategories));
+            //Console.WriteLine(ImportCategoryProducts(context, xmlCatProd));
+            Console.WriteLine(GetProductsInRange(context));
 
         }
 
@@ -53,7 +53,6 @@ namespace ProductShop
         {
             InitializeAutoMapper();
             const string root = "Users";
-
             var usersDtos = XmlConverter.Deserializer<UserInputModel>(inputXml, root);
             //var xmlSerializer = new XmlSerializer(typeof(UserInputModel[]),
             //    new XmlRootAttribute(root));
@@ -70,14 +69,12 @@ namespace ProductShop
             InitializeAutoMapper();
             const string root = "Products";
             var productsDtos = XmlConverter.Deserializer<ProductImputModel>(inputXml, root);
-
             //var xmlSerializer = new XmlSerializer(typeof(ProductImputModel[]),
             //    new XmlRootAttribute(root));
             //var textRead = new StringReader(inputXml);
             //var productsDtos = (ProductImputModel[])xmlSerializer.Deserialize(textRead);
             var products = mapper.Map<Product[]>(productsDtos);
             context.Products.AddRange(products);
-            //context.SaveChanges();
 
             return $"Successfully imported {context.SaveChanges()}"; ;
         }
@@ -87,14 +84,12 @@ namespace ProductShop
             InitializeAutoMapper();
             const string root = "Categories";
             var categoriesDtos = XmlConverter.Deserializer<CategoriesInputModel>(inputXml, root);
-
             //var xmlSerializer = new XmlSerializer(typeof(CategoriesInputModel[]),
             //    new XmlRootAttribute(root));
             //var textRead = new StringReader(inputXml);
             //var categoriesDtos = (CategoriesInputModel[])xmlSerializer.Deserialize(textRead);
             var categories = mapper.Map<Category[]>(categoriesDtos);
             context.Categories.AddRange(categories);
-            //context.SaveChanges();
 
             return $"Successfully imported {context.SaveChanges()}"; ;
         }
@@ -114,7 +109,7 @@ namespace ProductShop
             var allCategoriesProducts = context.CategoryProducts.ToList();
             foreach (var catProd in catProds)
             {
-                if (allCategoriesProducts.Any(x=> x.CategoryId == catProd.CategoryId && x.ProductId == catProd.ProductId))
+                if (allCategoriesProducts.Any(x => x.CategoryId == catProd.CategoryId && x.ProductId == catProd.ProductId))
                 {
                     continue;
                 }
@@ -125,7 +120,7 @@ namespace ProductShop
                 categoriesForBD.Add(catProd);
             }
             context.CategoryProducts.AddRange(categoriesForBD);
-            
+
 
             return $"Successfully imported {context.SaveChanges()}"; ;
         }

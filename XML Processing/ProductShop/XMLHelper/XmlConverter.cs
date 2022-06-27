@@ -67,4 +67,4 @@ namespace ProductShop.XMLHelper
             return xmlNamespaces;
         }
     }
-}
+ }
