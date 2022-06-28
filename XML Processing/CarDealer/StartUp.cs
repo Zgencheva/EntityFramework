@@ -7,6 +7,7 @@ using CarDealer.DataTransferObjects.Import;
 using CarDealer.Models;
 using System.Xml.Serialization;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace CarDealer
 {
@@ -18,10 +19,41 @@ namespace CarDealer
             var context = new CarDealerContext();
             //context.Database.EnsureDeleted();
             //context.Database.EnsureCreated();
-            var xmlSuppliers = File.ReadAllText("../../../Datasets/suppliers.xml");
-            var xmlParts = File.ReadAllText("../../../Datasets/parts.xml");
-            var xmlCars = File.ReadAllText("../../../Datasets/cars.xml");
-            Console.WriteLine(ImportCars(context, xmlCars));
+            //var xmlSuppliers = File.ReadAllText("../../../Datasets/suppliers.xml");
+            //var xmlParts = File.ReadAllText("../../../Datasets/parts.xml");
+            //var xmlCars = File.ReadAllText("../../../Datasets/cars.xml");
+            //var xmlCustomers = File.ReadAllText("../../../Datasets/customers.xml");
+            //var xmlSales = File.ReadAllText("../../../Datasets/sales.xml");
+            //Console.WriteLine(ImportSuppliers(context, xmlSuppliers));
+            // Console.WriteLine(ImportParts(context, xmlParts));
+            //Console.WriteLine(ImportCars(context, xmlCars));
+            //Console.WriteLine(ImportCustomers(context, xmlCustomers));
+            //Console.WriteLine(ImportSales(context, xmlSales));
+        }
+        public static string ImportSales(CarDealerContext context, string inputXml)
+        {
+            InitializeAutoMapper();
+            const string root = "Sales";
+            var cars = context.Cars.Select(x => x.Id).ToList();
+            var salesDtos = XmlConverter.Deserializer<SalesImputModel>(inputXml, root)
+                .Where(x=> cars.Contains(x.CarId));
+            var sales = mapper.Map<Sale[]>(salesDtos);
+
+            context.Sales.AddRange(sales);
+
+            return $"Successfully imported {context.SaveChanges()}";
+        }
+        public static string ImportCustomers(CarDealerContext context, string inputXml)
+        {
+            InitializeAutoMapper();
+            const string root = "Customers";
+
+            var customersDtos = XmlConverter.Deserializer<CustomersInputModel>(inputXml, root);
+            var customers = mapper.Map<Customer[]>(customersDtos);
+            
+            context.Customers.AddRange(customers);
+   
+            return $"Successfully imported {context.SaveChanges()}";
         }
         public static string ImportSuppliers(CarDealerContext context, string inputXml)
         {
@@ -59,13 +91,31 @@ namespace CarDealer
             const string root = "Cars";
 
             var carsDtos = XmlConverter.Deserializer<CarsInputModel>(inputXml, root);
-          
-            
-
-            var parts = mapper.Map<Car[]>(carsDtos);
-            context.Cars.AddRange(parts);
-            ;
-            return $"Successfully imported {context.SaveChanges()}"; ; ;
+            var allParts = context.Parts.Select(x => x.Id).ToList();
+            var cars = new List<Car>();
+            foreach (var carDto in carsDtos)
+            {
+                var distinctedParts = carDto.Parts.Select(x => x.Id).Distinct();
+                var parts = distinctedParts.Intersect(allParts);
+                var car = new Car
+                {
+                    Model = carDto.Model,
+                    Make = carDto.Make,
+                    TravelledDistance = carDto.TraveledDistance,
+                   
+                };
+                foreach (var part in parts)
+                {
+                    var partCar = new PartCar { PartId = part };
+                    car.PartCars.Add(partCar);
+                }
+                cars.Add(car);
+              
+            }
+         ;
+            context.Cars.AddRange(cars);
+            context.SaveChanges();
+            return $"Successfully imported {cars.Count}";
         }
         private static void InitializeAutoMapper()
         {
