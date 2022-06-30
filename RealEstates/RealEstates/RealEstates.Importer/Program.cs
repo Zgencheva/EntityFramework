@@ -27,7 +27,7 @@ namespace RealEstates.Importer
                     jsonProperty.TotalFloors, jsonProperty.Size,
                     jsonProperty.YardSize, jsonProperty.Year, jsonProperty.Type,
                     jsonProperty.BuildingType, jsonProperty.Price);
-                Console.WriteLine(".");
+                Console.Write(".");
             }
             //propertyService.Add();
         }

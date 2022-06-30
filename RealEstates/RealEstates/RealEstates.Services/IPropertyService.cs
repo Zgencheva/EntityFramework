@@ -13,6 +13,8 @@ namespace RealEstates.Services
             int maxFloor, int size, int yardSize, 
             int year, string propertyType, 
             string buildingType, int price);
+
+        decimal AveragePricePerSquareMEter();
         IEnumerable<PropertyInfoDto> Search(int minPrice, int maxPrice, int minSize, int maxSize);
         
     }

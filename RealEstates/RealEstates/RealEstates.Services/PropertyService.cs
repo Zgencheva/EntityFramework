@@ -58,6 +58,12 @@ namespace RealEstates.Services
             dbContext.SaveChanges();
         }
 
+        public decimal AveragePricePerSquareMEter()
+        {
+            return dbContext.Properties.Where(x => x.Price.HasValue)
+                .Average(x => x.Price / (decimal)x.Size ?? 0);
+        }
+
         public IEnumerable<PropertyInfoDto> Search(int minPrice, int maxPrice, int minSize, int maxSize)
         {
             var properties = dbContext.Properties.Where(x => x.Price >= minPrice && x.Price <= maxPrice && x.Size >= minSize && x.Size <= maxSize)
