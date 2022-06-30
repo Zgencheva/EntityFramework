@@ -17,7 +17,7 @@ namespace RealEstates.Models
         public int? TotalFloors { get; set; }
         public int? Year { get; set; }
         //Price is in euro
-        public int Price { get; set; }
+        public int? Price { get; set; }
 
         public int DistrictId { get; set; }
         public virtual District District { get; set; }
