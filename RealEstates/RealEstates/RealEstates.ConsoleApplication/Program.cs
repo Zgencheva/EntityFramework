@@ -12,7 +12,9 @@ namespace RealEstates.ConsoleApplication
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.Unicode;
+            Console.InputEncoding = Encoding.Unicode;
             var db = new ApplicationDbContext();
+            IPropertyService propertyService = new PropertyService(db);
             db.Database.Migrate();
 
             while (true)
@@ -22,13 +24,15 @@ namespace RealEstates.ConsoleApplication
                 Console.WriteLine("1. Property search");
                 Console.WriteLine("2. Most expensive districts");
                 Console.WriteLine("3. Average price per square meter");
+                Console.WriteLine("4. Add tag");
+                Console.WriteLine("5. Bulk tag to properties");
                 Console.WriteLine("0. Exit");
                 bool parsed = int.TryParse(Console.ReadLine(), out int option);
                 if (parsed && option == 0)
                 {
                     break;
                 }
-                if (parsed && (option >= 1 || option <= 3))
+                if (parsed && (option >= 1 || option <= 5))
                 {
                     switch (option)
                     {
@@ -41,6 +45,12 @@ namespace RealEstates.ConsoleApplication
                         case 3:
                             AveragePricePerSquareMeter(db);
                             break;
+                        case 4:
+                            AddTag(db);
+                            break;
+                        case 5:
+                            BulkTagToProperties(db, propertyService);
+                            break;
 
                     }
 
@@ -50,6 +60,26 @@ namespace RealEstates.ConsoleApplication
 
             }
 
+        }
+
+        private static void BulkTagToProperties(ApplicationDbContext db, IPropertyService propertyService)
+        {
+
+            Console.WriteLine("Bulk opration started!");
+            ITagService tagService = new TagService(db, propertyService);
+            tagService.BulkTagToProperties();
+            Console.WriteLine("Bulk opration finished!");
+        }
+
+        private static void AddTag(ApplicationDbContext db)
+        {
+            Console.WriteLine("Tag name:");
+            string tagName = Console.ReadLine();
+            Console.WriteLine("Tag importance(not required):");
+            bool isParsed = int.TryParse(Console.ReadLine(), out int tagImportance);
+            int? importance = isParsed ? tagImportance : null;
+            ITagService tagService = new TagService(db);
+            tagService.Add(tagName, importance);
         }
 
         private static void MostExpensiveDistricts(ApplicationDbContext db)
