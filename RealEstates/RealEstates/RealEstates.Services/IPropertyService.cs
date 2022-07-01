@@ -17,6 +17,8 @@ namespace RealEstates.Services
         decimal AveragePricePerSquareMEter();
 
         decimal AveragePricePerSquareMEter(int districtId);
+
+        public double AverageSize(int districtId);
         IEnumerable<PropertyInfoDto> Search(int minPrice, int maxPrice, int minSize, int maxSize);
         
     }

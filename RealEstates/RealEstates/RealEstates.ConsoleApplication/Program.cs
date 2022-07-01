@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using RealEstates.Data;
 using RealEstates.Models;
 using RealEstates.Services;
@@ -9,8 +10,10 @@ namespace RealEstates.ConsoleApplication
 {
     class Program
     {
+        static IMapper mapper;
         static void Main(string[] args)
         {
+            InitializeAutoMapper();
             Console.OutputEncoding = Encoding.Unicode;
             Console.InputEncoding = Encoding.Unicode;
             var db = new ApplicationDbContext();
@@ -121,6 +124,15 @@ namespace RealEstates.ConsoleApplication
                 Console.WriteLine($"{property.DistrictName}; " +
                     $"{property.BuildingType} => {property.Price}EUR => {property.Size}m^2");
             }
+        }
+
+        private static void InitializeAutoMapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile<RealEstateProfile>();
+            });
+            mapper = config.CreateMapper();
         }
     }
 }

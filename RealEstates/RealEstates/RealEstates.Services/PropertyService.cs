@@ -12,6 +12,7 @@ namespace RealEstates.Services
     public class PropertyService : IPropertyService
     {
         private readonly ApplicationDbContext dbContext;
+
         public PropertyService(ApplicationDbContext dbContext)
         {
             this.dbContext = dbContext;
@@ -60,17 +61,26 @@ namespace RealEstates.Services
 
         public decimal AveragePricePerSquareMEter()
         {
+            //WRONG COUNTS!!!
             return dbContext.Properties.Where(x => x.Price.HasValue)
                 .Average(x => x.Price / (decimal)x.Size ?? 0);
         }
         public decimal AveragePricePerSquareMEter(int districtId)
         {
+            //WRONG COUNTS!!!
             return dbContext.Properties.Where(x => x.Price.HasValue && x.DistrictId == districtId)
                 .Average(x => x.Price / (decimal)x.Size ?? 0);
+        }
+
+        public double AverageSize(int districtId)
+        {
+            return dbContext.Properties.Where(x=> x.DistrictId == districtId)
+                .Average(x => x.Size);
         }
         public IEnumerable<PropertyInfoDto> Search(int minPrice, int maxPrice, int minSize, int maxSize)
         {
             var properties = dbContext.Properties.Where(x => x.Price >= minPrice && x.Price <= maxPrice && x.Size >= minSize && x.Size <= maxSize)
+                //.ProjectTo<PropertyInfoDto>(mapper)
                 .Select(x=> new PropertyInfoDto { 
                     Size = x.Size,
                     Price = x.Price,

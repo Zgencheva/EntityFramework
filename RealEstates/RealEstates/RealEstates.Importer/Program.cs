@@ -9,6 +9,7 @@ namespace RealEstates.Importer
 {
     class Program
     {
+
         static void Main(string[] args)
         {
             ImportJsonFile("../../../imtBgHouses.json");
@@ -31,5 +32,7 @@ namespace RealEstates.Importer
             }
             //propertyService.Add();
         }
+
+       
     }
 }
