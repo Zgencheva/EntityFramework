@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
 using RealEstates.Models;
 using RealEstates.Services.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace RealEstates.Services.Profiler
 {
@@ -21,6 +18,8 @@ namespace RealEstates.Services.Profiler
                         d.Properties
                         .Where(x => x.Price.HasValue)
                         .Average(p => p.Price/ (decimal)p.Size) ?? 0));
+            this.CreateMap<Property, PropertyInfoFullData>();
+            this.CreateMap<Tag, TagInfoDto>();
 
         }
     }

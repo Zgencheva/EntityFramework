@@ -40,6 +40,7 @@ namespace RealEstates.Services
             var allProperties = dbContext.Properties.ToList();
             foreach (var property in allProperties)
             {
+                //TODO: fix the tags!
                 //скъп-евтин
                 var averagePrice = this.propertyService
                         .AveragePricePerSquareMEter(property.DistrictId);

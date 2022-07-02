@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RealEstates.Data;
-using RealEstates.Models;
 using RealEstates.Services;
 using System;
 using System.Text;

@@ -1,9 +1,6 @@
 ﻿using RealEstates.Services.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace RealEstates.Services
 {
@@ -17,6 +14,7 @@ namespace RealEstates.Services
         decimal AveragePricePerSquareMEter();
 
         decimal AveragePricePerSquareMEter(int districtId);
+        public IEnumerable<PropertyInfoFullData> GetFullData(int count);
 
         public double AverageSize(int districtId);
         IEnumerable<PropertyInfoDto> Search(int minPrice, int maxPrice, int minSize, int maxSize);

@@ -2,11 +2,9 @@
 using RealEstates.Data;
 using RealEstates.Models;
 using RealEstates.Services.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace RealEstates.Services
 {
@@ -78,6 +76,25 @@ namespace RealEstates.Services
         {
             return dbContext.Properties.Where(x=> x.DistrictId == districtId)
                 .Average(x => x.Size);
+        }
+
+        public IEnumerable<PropertyInfoFullData> GetFullData(int count)
+        {
+            //all properties which floors are between 1 and 8 and year Above 2015
+            var properties = dbContext.Properties
+                .Where(x => x.Floor.HasValue && x.Floor.Value > 1 && x.Floor.Value <= 8
+                && x.Year.HasValue && x.Year.Value > 2015)
+                 .ProjectTo<PropertyInfoFullData>(this.Mapper.ConfigurationProvider)
+                 .OrderByDescending(x=> x.Price)
+                 .ThenBy(x=> x.Size)
+                 .ThenBy(x=> x.Year)
+                 .Take(count)
+                .ToList();
+
+            return properties;
+
+
+
         }
         public IEnumerable<PropertyInfoDto> Search(int minPrice, int maxPrice, int minSize, int maxSize)
         {
