@@ -27,13 +27,14 @@ namespace RealEstates.ConsoleApplication
                 Console.WriteLine("3. Average price per square meter");
                 Console.WriteLine("4. Add tag");
                 Console.WriteLine("5. Bulk tag to properties");
+                Console.WriteLine("6. Property full info");
                 Console.WriteLine("0. Exit");
                 bool parsed = int.TryParse(Console.ReadLine(), out int option);
                 if (parsed && option == 0)
                 {
                     break;
                 }
-                if (parsed && (option >= 1 || option <= 5))
+                if (parsed && (option >= 1 || option <= 6))
                 {
                     switch (option)
                     {
@@ -52,6 +53,9 @@ namespace RealEstates.ConsoleApplication
                         case 5:
                             BulkTagToProperties(db, propertyService);
                             break;
+                        case 6:
+                            PropertyFullInfo(db, propertyService);
+                            break;
 
                     }
 
@@ -59,6 +63,28 @@ namespace RealEstates.ConsoleApplication
                     Console.ReadKey();
                 }
 
+            }
+
+        }
+
+        private static void PropertyFullInfo(ApplicationDbContext db, IPropertyService propertyService)
+        {
+            Console.WriteLine("Count of properties:");
+            int count = int.Parse(Console.ReadLine());
+            var result = propertyService.GetFullData(count);
+            foreach (var item in result)
+            {
+                Console.WriteLine(item.DistrictName);
+                Console.WriteLine(item.BuildingType);
+                Console.WriteLine(item.Id);
+                Console.WriteLine(item.Price);
+                Console.WriteLine(item.PropertyType);
+                Console.WriteLine(item.Size);
+                Console.WriteLine(item.Year);
+                foreach (var tag in item.Tags)
+                {
+                    Console.WriteLine(tag.Name);
+                }
             }
 
         }

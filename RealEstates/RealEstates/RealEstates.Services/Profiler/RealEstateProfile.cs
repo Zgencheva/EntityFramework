@@ -11,14 +11,17 @@ namespace RealEstates.Services.Profiler
         public RealEstateProfile()
         {
             this.CreateMap<Property, PropertyInfoDto>()
-                .ForMember(x=> x.BuildingType, y=> y.MapFrom(p=> p.BuildingType.Name));
+                .ForMember(x => x.BuildingType, y => y.MapFrom(p => p.BuildingType.Name))
+                .ForMember(x => x.PropertyType, y => y.MapFrom(p => p.Type.Name));
             this.CreateMap<District, DistrictInfoDto>()
              .ForMember(x => x.PropertiesCount, y => y.MapFrom(p => p.Properties.Count))
              .ForMember(x=> x.AveragePricePerSquareMeter, y=> y.MapFrom(d=> 
                         d.Properties
                         .Where(x => x.Price.HasValue)
                         .Average(p => p.Price/ (decimal)p.Size) ?? 0));
-            this.CreateMap<Property, PropertyInfoFullData>();
+            this.CreateMap<Property, PropertyInfoFullData>()
+                 .ForMember(x => x.BuildingType, y => y.MapFrom(p => p.BuildingType.Name))
+                 .ForMember(x=> x.PropertyType, y=> y.MapFrom(p=> p.Type.Name));
             this.CreateMap<Tag, TagInfoDto>();
 
         }
