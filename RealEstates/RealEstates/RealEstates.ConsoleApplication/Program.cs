@@ -1,8 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RealEstates.Data;
 using RealEstates.Services;
+using RealEstates.Services.Models;
 using System;
+using System.IO;
+using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace RealEstates.ConsoleApplication
 {
@@ -71,21 +75,26 @@ namespace RealEstates.ConsoleApplication
         {
             Console.WriteLine("Count of properties:");
             int count = int.Parse(Console.ReadLine());
-            var result = propertyService.GetFullData(count);
-            foreach (var item in result)
-            {
-                Console.WriteLine(item.DistrictName);
-                Console.WriteLine(item.BuildingType);
-                Console.WriteLine(item.Id);
-                Console.WriteLine(item.Price);
-                Console.WriteLine(item.PropertyType);
-                Console.WriteLine(item.Size);
-                Console.WriteLine(item.Year);
-                foreach (var tag in item.Tags)
-                {
-                    Console.WriteLine(tag.Name);
-                }
-            }
+            var result = propertyService.GetFullData(count).ToArray();
+            var stringWriter = new StringWriter();
+            var xmlSerializer = new XmlSerializer(typeof(PropertyInfoFullData[]));
+            xmlSerializer.Serialize(stringWriter, result);
+
+            Console.WriteLine(stringWriter.ToString().TrimEnd());
+            //foreach (var item in result)
+            //{
+            //    Console.WriteLine(item.DistrictName);
+            //    Console.WriteLine(item.BuildingType);
+            //    Console.WriteLine(item.Id);
+            //    Console.WriteLine(item.Price);
+            //    Console.WriteLine(item.PropertyType);
+            //    Console.WriteLine(item.Size);
+            //    Console.WriteLine(item.Year);
+            //    foreach (var tag in item.Tags)
+            //    {
+            //        Console.WriteLine(tag.Name);
+            //    }
+            //}
 
         }
 
