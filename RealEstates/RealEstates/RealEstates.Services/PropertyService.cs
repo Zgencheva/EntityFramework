@@ -1,4 +1,5 @@
-﻿using RealEstates.Data;
+﻿using AutoMapper.QueryableExtensions;
+using RealEstates.Data;
 using RealEstates.Models;
 using RealEstates.Services.Models;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace RealEstates.Services
 {
-    public class PropertyService : IPropertyService
+    public class PropertyService : BaseService, IPropertyService
     {
         private readonly ApplicationDbContext dbContext;
 
@@ -61,14 +62,15 @@ namespace RealEstates.Services
 
         public decimal AveragePricePerSquareMEter()
         {
-            //WRONG COUNTS!!!
+          
             return dbContext.Properties.Where(x => x.Price.HasValue)
                 .Average(x => x.Price / (decimal)x.Size ?? 0);
         }
         public decimal AveragePricePerSquareMEter(int districtId)
         {
-            //WRONG COUNTS!!!
-            return dbContext.Properties.Where(x => x.Price.HasValue && x.DistrictId == districtId)
+         
+            return dbContext.Properties.Where(x => x.Price.HasValue 
+            && x.DistrictId == districtId)
                 .Average(x => x.Price / (decimal)x.Size ?? 0);
         }
 
@@ -79,15 +81,9 @@ namespace RealEstates.Services
         }
         public IEnumerable<PropertyInfoDto> Search(int minPrice, int maxPrice, int minSize, int maxSize)
         {
-            var properties = dbContext.Properties.Where(x => x.Price >= minPrice && x.Price <= maxPrice && x.Size >= minSize && x.Size <= maxSize)
-                //.ProjectTo<PropertyInfoDto>(mapper)
-                .Select(x=> new PropertyInfoDto { 
-                    Size = x.Size,
-                    Price = x.Price,
-                    BuildingType = x.BuildingType.Name,
-                    DistrictName = x.District.Name,
-                    PropertyType = x.Type.Name,
-                })
+            var properties = dbContext.Properties.Where(x => x.Price >= minPrice 
+            && x.Price <= maxPrice && x.Size >= minSize && x.Size <= maxSize)
+                .ProjectTo<PropertyInfoDto>(this.Mapper.ConfigurationProvider)
                 .ToList();
             return properties;
         }

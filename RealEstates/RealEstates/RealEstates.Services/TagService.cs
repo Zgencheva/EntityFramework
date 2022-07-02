@@ -5,13 +5,14 @@ using System.Linq;
 
 namespace RealEstates.Services
 {
-    public class TagService : ITagService
+    public class TagService :BaseService, ITagService
     {
         private readonly ApplicationDbContext dbContext;
         private readonly IPropertyService propertyService;
         public TagService(ApplicationDbContext dbContext)
         {
             this.dbContext = dbContext;
+            this.propertyService = new PropertyService(dbContext);
         }
 
         public TagService(ApplicationDbContext dbContext, IPropertyService propertyService)
@@ -40,7 +41,8 @@ namespace RealEstates.Services
             foreach (var property in allProperties)
             {
                 //скъп-евтин
-                var averagePrice = this.propertyService.AveragePricePerSquareMEter(property.DistrictId);
+                var averagePrice = this.propertyService
+                        .AveragePricePerSquareMEter(property.DistrictId);
                 if (property.Price >= averagePrice)
                 {
                     var tag = GetTagByName("скъп-имот");

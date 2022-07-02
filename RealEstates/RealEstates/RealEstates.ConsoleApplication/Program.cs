@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using RealEstates.Data;
 using RealEstates.Models;
 using RealEstates.Services;
@@ -10,10 +9,10 @@ namespace RealEstates.ConsoleApplication
 {
     class Program
     {
-        static IMapper mapper;
+
         static void Main(string[] args)
         {
-            InitializeAutoMapper();
+           
             Console.OutputEncoding = Encoding.Unicode;
             Console.InputEncoding = Encoding.Unicode;
             var db = new ApplicationDbContext();
@@ -67,7 +66,6 @@ namespace RealEstates.ConsoleApplication
 
         private static void BulkTagToProperties(ApplicationDbContext db, IPropertyService propertyService)
         {
-
             Console.WriteLine("Bulk opration started!");
             ITagService tagService = new TagService(db, propertyService);
             tagService.BulkTagToProperties();
@@ -126,13 +124,6 @@ namespace RealEstates.ConsoleApplication
             }
         }
 
-        private static void InitializeAutoMapper()
-        {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<RealEstateProfile>();
-            });
-            mapper = config.CreateMapper();
-        }
+       
     }
 }
