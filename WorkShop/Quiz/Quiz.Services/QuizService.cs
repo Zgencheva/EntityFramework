@@ -44,10 +44,7 @@ namespace Quiz.Services
 
             return quizViewModel;
 
-
         }
-   
-
         
     }
 }

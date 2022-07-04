@@ -17,17 +17,19 @@ namespace Quiz.ConsoleUI
             ConfigureService(serviceCollection);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            var quizService = serviceProvider.GetService<IQuizService>();
-            var quiz = quizService.GetQuizById(1);
-            Console.WriteLine(quiz.Title);
-            foreach (var question in quiz.Questions)
-            {
-                Console.WriteLine(question.Title);
-                foreach (var answer in question.Answers)
-                {
-                    Console.WriteLine(answer.Title);
-                }
-            }
+            //var questionService = serviceProvider.GetService<IQuestionService>();
+            //questionService.Add("1+1", 1);
+
+            //var answerService = serviceProvider.GetService<IAnswerService>();
+            //answerService.Add("2", 5, true, 2);
+
+            //var userAnswerService = serviceProvider.GetService<IUserAnswerService>();
+            //userAnswerService.AddUserAnswer("c5173dd5-d71e-4b23-a503-a599a7212588", 1,2, 1);
+
+            var quizService = serviceProvider.GetService<IUserAnswerService>();
+            var result = quizService.GetUserResult("c5173dd5-d71e-4b23-a503-a599a7212588", 1);
+            Console.WriteLine(result);
+           
             //quizService.Add("C# DB");
 
             //var questionService = serviceProvider.GetService<IQuestionService>();
@@ -48,6 +50,7 @@ namespace Quiz.ConsoleUI
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
+
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configurations.GetConnectionString("DefaultConnection")));
 

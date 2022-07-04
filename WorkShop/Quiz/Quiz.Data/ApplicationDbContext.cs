@@ -20,8 +20,8 @@ namespace Quiz.Data
         public DbSet<UserAnswer> UserAnswers { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<UserAnswer>()
-                .HasKey(x => new { x.IdentityUserId, x.QuizId });
+            //builder.Entity<UserAnswer>()
+            //    .HasKey(x => new { x.IdentityUserId, x.QuizId });
 
             builder.Entity<Answer>()
                 .HasOne(x => x.Question)
