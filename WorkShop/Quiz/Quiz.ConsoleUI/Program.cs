@@ -17,6 +17,8 @@ namespace Quiz.ConsoleUI
             ConfigureService(serviceCollection);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
+            //var dbContext = serviceProvider.GetService<ApplicationDbContext>();
+            //dbContext.Database.Migrate();
             //var questionService = serviceProvider.GetService<IQuestionService>();
             //questionService.Add("1+1", 1);
 
