@@ -2,9 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Quiz.Data;
 using Quiz.Services;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Quiz.ConsoleUI
@@ -17,8 +20,26 @@ namespace Quiz.ConsoleUI
             ConfigureService(serviceCollection);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
+            var json = File.ReadAllText("../../../EF-Core-Quiz.json");
+            var questions = JsonConvert.DeserializeObject<IEnumerable<JsonQuestion>>(json);
+
+            var quizService = serviceProvider.GetService<IQuizService>();
+            var questionService = serviceProvider.GetService<IQuestionService>();
+            var answerService = serviceProvider.GetService<IAnswerService>();
+
+            var quizId = quizService.Add("EF Core test");
+
+            foreach (var question in questions)
+            {
+                var questionId = questionService.Add(question.Question, quizId);
+                foreach (var answer in question.Answers)
+                {
+                    answerService.Add(answer.Answer, answer.Correct ? 1 : 0,answer.Correct, questionId);
+                }
+            }
             //var dbContext = serviceProvider.GetService<ApplicationDbContext>();
             //dbContext.Database.Migrate();
+
             //var questionService = serviceProvider.GetService<IQuestionService>();
             //questionService.Add("1+1", 1);
 
@@ -28,10 +49,10 @@ namespace Quiz.ConsoleUI
             //var userAnswerService = serviceProvider.GetService<IUserAnswerService>();
             //userAnswerService.AddUserAnswer("c5173dd5-d71e-4b23-a503-a599a7212588", 1,2, 1);
 
-            var quizService = serviceProvider.GetService<IUserAnswerService>();
-            var result = quizService.GetUserResult("c5173dd5-d71e-4b23-a503-a599a7212588", 1);
-            Console.WriteLine(result);
-           
+            //var quizService = serviceProvider.GetService<IUserAnswerService>();
+            //var result = quizService.GetUserResult("c5173dd5-d71e-4b23-a503-a599a7212588", 1);
+            //Console.WriteLine(result);
+
             //quizService.Add("C# DB");
 
             //var questionService = serviceProvider.GetService<IQuestionService>();

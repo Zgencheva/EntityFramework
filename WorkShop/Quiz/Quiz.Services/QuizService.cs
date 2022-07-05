@@ -13,11 +13,13 @@ namespace Quiz.Services
         {
             this.applicationDbContext = dbContext;
         }
-        public void Add(string title)
+        public int Add(string title)
         {
             var quiz = new Quiz.Models.Quiz { Title = title };
             this.applicationDbContext.Quizzes.Add(quiz);
             this.applicationDbContext.SaveChanges();
+
+            return quiz.Id;
         }
         public QuizViewModel GetQuizById(int quizId)
         {
