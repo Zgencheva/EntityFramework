@@ -5,8 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Quiz.Data;
 using Quiz.Services;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -17,76 +15,42 @@ namespace Quiz.ConsoleUI
         static void Main(string[] args)
         {
             var serviceCollection = new ServiceCollection();
-            ConfigureService(serviceCollection);
+            ConfigureServices(serviceCollection);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            var json = File.ReadAllText("../../../EF-Core-Quiz.json");
-            var questions = JsonConvert.DeserializeObject<IEnumerable<JsonQuestion>>(json);
-
-            var quizService = serviceProvider.GetService<IQuizService>();
-            var questionService = serviceProvider.GetService<IQuestionService>();
-            var answerService = serviceProvider.GetService<IAnswerService>();
-
-            var quizId = quizService.Add("EF Core test");
-
-            foreach (var question in questions)
-            {
-                var questionId = questionService.Add(question.Question, quizId);
-                foreach (var answer in question.Answers)
-                {
-                    answerService.Add(answer.Answer, answer.Correct ? 1 : 0,answer.Correct, questionId);
-                }
-            }
-            //var dbContext = serviceProvider.GetService<ApplicationDbContext>();
-            //dbContext.Database.Migrate();
-
-            //var questionService = serviceProvider.GetService<IQuestionService>();
-            //questionService.Add("1+1", 1);
+            var jsonImporter = serviceProvider.GetService<IJsonImportService>();
+            jsonImporter.Import("EF-Core-Quiz.json", "EF Core Test v2");
 
             //var answerService = serviceProvider.GetService<IAnswerService>();
             //answerService.Add("2", 5, true, 2);
 
             //var userAnswerService = serviceProvider.GetService<IUserAnswerService>();
-            //userAnswerService.AddUserAnswer("c5173dd5-d71e-4b23-a503-a599a7212588", 1,2, 1);
+            //userAnswerService.AddUserAnswer("df871d8b-1e64-49cc-92db-f35ab8a75452", 1, 2, 1);
 
             //var quizService = serviceProvider.GetService<IUserAnswerService>();
-            //var result = quizService.GetUserResult("c5173dd5-d71e-4b23-a503-a599a7212588", 1);
-            //Console.WriteLine(result);
+            //var quiz = quizService.GetUserResult("df871d8b-1e64-49cc-92db-f35ab8a75452", 1);
 
-            //quizService.Add("C# DB");
-
-            //var questionService = serviceProvider.GetService<IQuestionService>();
-            //questionService.Add("What is Ef Core", 1);
-
-            //var answerService = serviceProvider.GetService<IAnswerService>();
-            ////answerService.Add("It is on ORM", 5, true, 1);
-            //answerService.Add("It is a MicroORM", 0, false, 1);
-            //var userAnswerService = serviceProvider.GetService<IUserAnswerService>();
-            //userAnswerService.AddUserAnswer("c5173dd5-d71e-4b23-a503-a599a7212588", 1,1, 2);
-
-
+            //Console.WriteLine(quiz);
         }
 
-        private static void ConfigureService(IServiceCollection services) 
+        private static void ConfigureServices(IServiceCollection services)
         {
-            var configurations = new ConfigurationBuilder()
+            var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configurations.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(options
+                => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddDefaultIdentity<IdentityUser>(options => 
-            options.SignIn.RequireConfirmedAccount = true)
+            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
               .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddTransient<IQuizService, QuizService>();
+            services.AddTransient<IQuizService, QuizSerivce>();
             services.AddTransient<IQuestionService, QuestionService>();
-            services.AddTransient<IAnswerService, AnswerService>(); 
+            services.AddTransient<IAnswerService, AnswerService>();
             services.AddTransient<IUserAnswerService, UserAnswerService>();
-
-
+            services.AddTransient<IJsonImportService, JsonImportService>();
         }
     }
 }
