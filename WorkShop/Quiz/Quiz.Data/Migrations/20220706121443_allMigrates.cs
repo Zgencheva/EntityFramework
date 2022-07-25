@@ -2,7 +2,7 @@
 
 namespace Quiz.Data.Migrations
 {
-    public partial class AddCollectionsToReversedProperties : Migration
+    public partial class allMigrates : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
