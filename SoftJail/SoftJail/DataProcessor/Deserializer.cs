@@ -128,17 +128,13 @@
                     Salary = officerPrisoner.Salary,
                     Position = Enum.Parse<Position>(officerPrisoner.Position),
                     Weapon = Enum.Parse<Weapon>(officerPrisoner.Weapon),
-                    DepartmentId = officerPrisoner.DepartmentId
-                };
-
-                foreach (var prisoner in prisonersIds)
-                {
-                    var currentOfficerPrisoner = new OfficerPrisoner
+                    DepartmentId = officerPrisoner.DepartmentId,
+                    OfficerPrisoners = officerPrisoner.OfficerPrisoners.Select(x => new OfficerPrisoner
                     {
-                        PrisonerId = prisoner,
-                    };
-                    officer.OfficerPrisoners.Add(currentOfficerPrisoner);
-                }
+                        PrisonerId = x.Id
+                    })
+                    .ToList()
+                };
 
                 offiers.Add(officer);
                 sb.AppendLine($"Imported {officer.FullName} ({officer.OfficerPrisoners.Count} prisoners)");
