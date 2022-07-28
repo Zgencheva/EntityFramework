@@ -1,7 +1,9 @@
 ﻿namespace SoftJail
 {
     using AutoMapper;
-
+    using SoftJail.Data.Models;
+    using SoftJail.DataProcessor.ExportDto;
+    using System.Linq;
 
     public class SoftJailProfile : Profile
     {
@@ -9,7 +11,13 @@
         
         public SoftJailProfile()
         {
-            
+            this.CreateMap<Prisoner, PrisonerMailsExportModel>()
+                .ForMember(x=> x.IncarcerationDate, 
+                y=> y.MapFrom(s=> s.IncarcerationDate.ToString("yyyy-MM-dd")))
+                .ForMember(x=> x.Name, y=> y.MapFrom(s=> s.FullName))
+                .ForMember(x=> x.EncryptedMessages, y=> y.MapFrom(s=> s.Mails));
+            this.CreateMap<Mail, MessageExportModel>()
+                .ForMember(x=> x.Description, y=> y.MapFrom(s=> string.Join("", s.Description.Reverse())));
         }
     }
 }

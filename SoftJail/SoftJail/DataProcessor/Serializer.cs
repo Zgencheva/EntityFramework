@@ -1,12 +1,13 @@
 ﻿namespace SoftJail.DataProcessor
 {
-
+    using AutoMapper.QueryableExtensions;
     using Data;
     using Newtonsoft.Json;
     using SoftJail.DataProcessor.ExportDto;
     using SoftJail.XMLHelper;
     using System;
     using System.Globalization;
+    using Microsoft.EntityFrameworkCore;
     using System.Linq;
     using System.Text;
 
@@ -43,19 +44,10 @@
         {
             var root = "Prisoners";
             var names = prisonersNames.Split(",").ToArray();
-            var prisoners = context.Prisoners.
-                 Where(x => names.Contains(x.FullName))
-                 .Select(x => new PrisonerMailsExportModel
-                 {
-                     Id = x.Id,
-                     Name = x.FullName,
-                     IncarcerationDate = x.IncarcerationDate.ToString("yyyy-MM-dd"),
-                    EncryptedMessages = x.Mails.Select(m => new MessageExportModel
-                    {
-                        Description = ReverseDescription(m.Description)
-                    })
-                     .ToArray()
-                 })
+            var prisoners = context.Prisoners
+                .Include(y => y.Mails)
+                 .Where(x => names.Contains(x.FullName))
+                 .ProjectTo<PrisonerMailsExportModel>()
                  .OrderBy(x=> x.Name)
                  .ThenBy(x=> x.Id)
                  .ToArray();
