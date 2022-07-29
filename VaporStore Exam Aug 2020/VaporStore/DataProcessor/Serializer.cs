@@ -1,39 +1,99 @@
 ﻿namespace VaporStore.DataProcessor
 {
 	using System;
+    using System.Globalization;
+    using System.IO;
     using System.Linq;
+    using System.Xml.Serialization;
+    using AutoMapper.QueryableExtensions;
     using Data;
     using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
+    using VaporStore.Data.Models.Enums;
+    using VaporStore.DataProcessor.Dto.Export;
 
     public static class Serializer
 	{
 		public static string ExportGamesByGenres(VaporStoreDbContext context, string[] genreNames)
 		{
-			var result = context.Games
-				.Include(x => x.Genre)
-				.Include(x => x.Purchases)
-				.Where(x=> genreNames.Contains(x.Genre.Name) && x.Purchases.Count>0)
-				.Select(x=> new 
-				{ 
-					Id = x.Genre.Id,
-					Genre = x.Genre.Name,
-					Games = new 
-					{
-						Id = x.Id,
-						Title = x.Name,
-						Developer = x.Developer.Name,
-						Tags = string.Join(",", x.GameTags.Select(t=> t.Tag.Name)),
-						Players = x.Purchases.Count,
-					}
+			var genres = context.Genres
+                .Include(x => x.Games)
+                .ThenInclude(x => x.Purchases)
+                .ToList()
+                .Where(x => x.Games.Any(x => x.Purchases.Count() > 0) && genreNames.Contains(x.Name))
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    Genre = x.Name,
+                    Games = x.Games.Where(w=> w.Purchases.Count() > 0)
+                        .Select(g => new
+                        {
+                            Id = g.Id,
+                            Title = g.Name,
+                            Developer = g.Developer.Name,
+                            Tags = string.Join(", ", g.GameTags.Select(t => t.Tag.Name)),
+                            Players = g.Purchases.Count(),
+                        })
+                        .OrderByDescending(x => x.Players)
+                        .ThenBy(x => x.Id)
+                        .ToList(),
 
-				});
+                    TotalPlayers = x.Games.Sum(x => x.Purchases.Count())
+                })
+                .OrderByDescending(x=> x.TotalPlayers)
+                .ThenBy(x => x.Id)
+                .ToList();
 
-			return null;
+            var result = JsonConvert.SerializeObject(genres, Formatting.Indented);
+			return result;
+		
 		}
 
 		public static string ExportUserPurchasesByType(VaporStoreDbContext context, string storeType)
 		{
-			throw new NotImplementedException();
-		}
+            var type = Enum.Parse<PurchaseType>(storeType);
+      
+            var root = "Users";
+            var users = context.Users
+            .ToList()
+            .Where(x => x.Cards.Any(c => c.Purchases.Any(p=> p.Type.ToString() == storeType)))
+            .Select(x => new UserPurchasesExportDto
+             {
+                 Username = x.Username,
+                TotalSpent = x.Cards
+                            .SelectMany(c => c.Purchases)
+                             .Where(p => p.Type == type)
+                             .Sum(p => p.Game.Price),
+                Purchases = x.Cards.SelectMany(c => c.Purchases)
+                             .Where(p => p.Type == type)
+                             .Select(p => new PurchasesExportDto
+                             {
+                                 Card = p.Card.Number,
+                                 Cvc = p.Card.Cvc,
+                                 Date = p.Date.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                                 Game = new GameExportDto
+                                 {
+                                     Title = p.Game.Name,
+                                     Genre = p.Game.Genre.Name,
+                                     Price = p.Game.Price,
+                                 }
+                             })
+                             .OrderBy(x => x.Date)
+                             .ToArray()
+
+             })
+            .OrderByDescending(x => x.TotalSpent)
+            .ThenBy(x => x.Username)
+            .ToArray();
+
+            var result = XmlConverter.Serialize<UserPurchasesExportDto>(users, root);
+            //XmlSerializer xmlSerializer = new XmlSerializer(typeof(UserPurchasesExportDto[]),
+            //     new XmlRootAttribute(root));
+            //var sw = new StringWriter();
+            //xmlSerializer.Serialize(sw, users);
+            return result.ToString().TrimEnd(); ;
+        
+      
+        }
 	}
 }
