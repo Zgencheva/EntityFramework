@@ -19,10 +19,6 @@
             var gamesDtos =
                 JsonConvert.DeserializeObject<IEnumerable<GameImportDto>>(jsonString);
             var sb = new StringBuilder();
-            var games = new List<Game>();
-            var developers = new List<Developer>();
-            var genres = new List<Genre>();
-            var tags = new List<Tag>();
             foreach (var gameDto in gamesDtos)
             {
 
@@ -31,29 +27,10 @@
                     sb.AppendLine("Invalid Data");
                     continue;
                 }
-                var gameTags = new List<GameTag>();
-                foreach (var tag in gameDto.Tags)
-                {
-                    var currentTag = tags.FirstOrDefault(x=> x.Name == tag);
-                    if (currentTag == null)
-                    {
-                        currentTag = new Tag { Name = tag };
-                        tags.Add(currentTag);
-                    }
-                    gameTags.Add(new GameTag {Tag = currentTag });
-                }
-                Developer developer = developers.FirstOrDefault(x=> x.Name == gameDto.Developer);
-                if (developer == null)
-                {
-                    developer = new Developer { Name = gameDto.Developer };
-                    developers.Add(developer);
-                }
-                var genre = genres.FirstOrDefault(x => x.Name == gameDto.Genre);
-                if (genre == null)
-                {
-                    genre = new Genre { Name = gameDto.Genre };
-                    genres.Add(genre);
-                }
+                var developer = context.Developers.FirstOrDefault(x => x.Name == gameDto.Developer)
+                    ?? new Developer { Name = gameDto.Name };
+                var genre = context.Genres.FirstOrDefault(x => x.Name == gameDto.Genre)
+                    ?? new Genre { Name = gameDto.Genre };
                 var game = new Game
                 {
                     Name = gameDto.Name,
@@ -61,15 +38,18 @@
                     ReleaseDate = DateTime.ParseExact(gameDto.ReleaseDate, "yyyy-MM-dd", CultureInfo.InvariantCulture),
                     Developer = developer,
                     Genre = genre,
-                    GameTags = gameTags,
 
                 };
-
-                games.Add(game);
+                foreach (var gameTag in gameDto.Tags)
+                {
+                    var tag = context.Tags.FirstOrDefault(x => x.Name == gameTag)
+                        ?? new Tag { Name = gameTag };
+                    game.GameTags.Add(new GameTag { Tag = tag });
+                }
+                context.Games.Add(game);
+                context.SaveChanges();
                 sb.AppendLine($"Added {game.Name} ({game.Genre.Name}) with {game.GameTags.Count} tags");
             }
-            context.Games.AddRange(games);
-            context.SaveChanges();
 
             return sb.ToString().TrimEnd();
         }

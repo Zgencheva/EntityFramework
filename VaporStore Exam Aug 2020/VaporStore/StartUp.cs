@@ -15,7 +15,7 @@
 
 			Mapper.Initialize(config => config.AddProfile<VaporStoreProfile>());
 
-			ResetDatabase(context, shouldDropDatabase: false);
+			ResetDatabase(context, shouldDropDatabase: true);
 
 			var projectDir = GetProjectDirectory();
 
