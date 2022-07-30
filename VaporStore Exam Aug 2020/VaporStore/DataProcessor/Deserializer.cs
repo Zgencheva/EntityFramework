@@ -28,7 +28,7 @@
                     continue;
                 }
                 var developer = context.Developers.FirstOrDefault(x => x.Name == gameDto.Developer)
-                    ?? new Developer { Name = gameDto.Name };
+                    ?? new Developer { Name = gameDto.Developer };
                 var genre = context.Genres.FirstOrDefault(x => x.Name == gameDto.Genre)
                     ?? new Genre { Name = gameDto.Genre };
                 var game = new Game
@@ -101,6 +101,16 @@
                     sb.AppendLine("Invalid Data");
                     continue;
                 }
+                var parseDate = DateTime.TryParseExact(purchaseDto.Date,
+                    "dd/MM/yyyy HH:mm",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out var date);
+                if (!parseDate)
+                {
+                    sb.AppendLine("Invalid Data");
+                    continue;
+                }
                 var currentGame = context.Games.FirstOrDefault(x => x.Name == purchaseDto.Title);
                 if (currentGame == null)
                 {
@@ -116,9 +126,10 @@
                 var currentUSer = context.Users.FirstOrDefault(x => x.Cards.Any(c => c.Number == purchaseDto.Card));
                 var purchase = new Purchase
                 {
-                    Type = Enum.Parse<PurchaseType>(purchaseDto.Type),
+                    //Type = Enum.Parse<PurchaseType>(purchaseDto.Type),
+                    Type = purchaseDto.Type.Value,
                     ProductKey = purchaseDto.Key,
-                    Date = DateTime.ParseExact(purchaseDto.Date, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture),
+                    Date = date,
                     Card=currentCard,
                     Game = currentGame,
                 };

@@ -16,13 +16,14 @@ namespace VaporStore.DataProcessor.Dto.Import
         [XmlElement("Type")]
         [EnumDataType(typeof(PurchaseType))]
         [Required]
-        public string Type { get; set; }
+        public PurchaseType? Type { get; set; }
         [XmlElement("Key")]
         [Required]
         [RegularExpression(@"^[A-Z\d]{4}-[A-Z\d]{4}-[A-Z\d]{4}$")]
         public string Key { get; set; }
         [XmlElement("Card")]
         [Required]
+        [RegularExpression(@"^\d{4}\s\d{4}\s\d{4}\s\d{4}$")]
         public string Card { get; set; }
         [XmlElement("Date")]
         [Required]

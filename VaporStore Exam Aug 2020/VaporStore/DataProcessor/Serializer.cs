@@ -50,40 +50,35 @@
 		}
 
 		public static string ExportUserPurchasesByType(VaporStoreDbContext context, string storeType)
-		{
-            var type = Enum.Parse<PurchaseType>(storeType);
-      
+		{   
             var root = "Users";
             var users = context.Users
             .ToList()
-            .Where(x => x.Cards.Any(c => c.Purchases.Any(p=> p.Type.ToString() == storeType)))
+            .Where(x => x.Cards.Any(c => c.Purchases.Any(p => p.Type.ToString() == storeType)))
             .Select(x => new UserPurchasesExportDto
-             {
-                 Username = x.Username,
-                TotalSpent = x.Cards
-                            .SelectMany(c => c.Purchases)
-                             .Where(p => p.Type == type)
-                             .Sum(p => p.Game.Price),
-                Purchases = x.Cards.SelectMany(c => c.Purchases)
-                             .Where(p => p.Type == type)
-                             .Select(p => new PurchasesExportDto
-                             {
-                                 Card = p.Card.Number,
-                                 Cvc = p.Card.Cvc,
-                                 Date = p.Date.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
-                                 Game = new GameExportDto
-                                 {
-                                     Title = p.Game.Name,
-                                     Genre = p.Game.Genre.Name,
-                                     Price = p.Game.Price,
-                                 }
-                             })
-                             .OrderBy(x => x.Date)
-                             .ToArray()
-
-             })
-            .OrderByDescending(x => x.TotalSpent)
-            .ThenBy(x => x.Username)
+            {
+                Username = x.Username,
+                Purchases = x.Cards.SelectMany(c => c.Purchases).Where(p => p.Type.ToString() == storeType)
+                    .Select(p => new PurchasesExportDto
+                    {
+                        Card = p.Card.Number,
+                        Cvc = p.Card.Cvc,
+                        Date = p.Date.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
+                        Game = new GameExportDto
+                        {
+                            Title = p.Game.Name,
+                            Genre = p.Game.Genre.Name,
+                            Price = p.Game.Price
+                        }
+                    })
+                    .OrderBy(x=> x.Date)
+                    .ToArray(),
+                TotalSpent = x.Cards.SelectMany(c => c.Purchases)
+                    .Where(p => p.Type.ToString() == storeType)
+                    .Sum(p => p.Game.Price),
+            })
+            .OrderByDescending(x=> x.TotalSpent)
+            .ThenBy(x=> x.Username)
             .ToArray();
 
             var result = XmlConverter.Serialize<UserPurchasesExportDto>(users, root);
